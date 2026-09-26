@@ -5,18 +5,21 @@
 
 import { initLocalModelDownloader } from './download-model.js';
 
-function copyToClipboard(targetId, btn) {
+async function copyToClipboard(targetId, btn) {
   const el = document.getElementById(targetId);
   if (!el) return;
   const text = (el instanceof HTMLInputElement ? el.value : el.textContent).trim();
   const fullUrl = text.startsWith('/') ? window.location.origin + text : text;
-  navigator.clipboard.writeText(fullUrl).then(() => {
-    const orig = btn.textContent;
-    btn.textContent = 'Copied!';
-    setTimeout(() => { btn.textContent = orig; }, 1500);
-  }).catch((error) => {
+  try {
+    // navigator.clipboard is undefined outside secure contexts (plain http on a LAN host).
+    await navigator.clipboard.writeText(fullUrl);
+  } catch (error) {
     console.error(`Failed to copy #${targetId} to the clipboard`, error);
-  });
+    return;
+  }
+  const orig = btn.textContent;
+  btn.textContent = 'Copied!';
+  setTimeout(() => { btn.textContent = orig; }, 1500);
 }
 
 document.addEventListener('DOMContentLoaded', () => {
