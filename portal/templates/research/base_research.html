@@ -120,6 +120,16 @@
     .research-content tr:last-child td {
         border-bottom: none;
     }
+    .research-content pre {
+        overflow-x: auto;
+    }
+    @media (max-width: 640px) {
+        /* Wide comparison tables scroll inside themselves instead of widening the page. */
+        .research-content table {
+            display: block;
+            overflow-x: auto;
+        }
+    }
     .disclaimer-box {
         background: #fffaf0;
         border: 1px solid #feebc8;
