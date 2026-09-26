@@ -6,13 +6,20 @@ from pathlib import Path
 import pytest
 
 ROOT = Path(__file__).resolve().parent.parent / "portal"
-STATIC_REF = re.compile(r"url_for\(\s*['\"]static['\"]\s*,\s*path\s*=\s*['\"]([^'\"]+)['\"]")
+# url_for('static', path='...') and literal src="/static/..." / href="/static/..." references.
+STATIC_REFS = (
+    re.compile(r"url_for\(\s*['\"]static['\"]\s*,\s*path\s*=\s*['\"]([^'\"]+)['\"]"),
+    re.compile(r"(?:src|href)\s*=\s*['\"]/static/([^'\"?#{]+)"),
+)
 
 
 def _static_references():
     for template in sorted((ROOT / "templates").rglob("*.html")):
-        for match in STATIC_REF.finditer(template.read_text(encoding="utf-8")):
-            yield pytest.param(template.relative_to(ROOT).as_posix(), match.group(1), id=match.group(1))
+        source = template.read_text(encoding="utf-8")
+        for pattern in STATIC_REFS:
+            for match in pattern.finditer(source):
+                name = template.relative_to(ROOT).as_posix()
+                yield pytest.param(name, match.group(1), id=f"{name}:{match.group(1)}")
 
 
 @pytest.mark.parametrize(("template", "path"), list(_static_references()))
