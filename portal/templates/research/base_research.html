@@ -124,10 +124,16 @@
         overflow-x: auto;
     }
     @media (max-width: 640px) {
-        /* Wide comparison tables scroll inside themselves instead of widening the page. */
+        /* Tighter cells let most comparison tables fit a phone screen; any that are still
+           wider scroll inside themselves instead of widening the page. */
         .research-content table {
             display: block;
             overflow-x: auto;
+            font-size: 0.8125rem;
+        }
+        .research-content th, .research-content td {
+            padding: 8px 6px;
+            hyphens: auto;
         }
     }
     .disclaimer-box {
