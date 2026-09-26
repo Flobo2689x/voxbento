@@ -67,8 +67,9 @@
   <div style="display:flex; gap:16px; align-items:center; flex-wrap:wrap;">
     <span class="join-code">{{ event.listener_join_code }}</span>
     <div class="copy-field" style="flex:1; min-width:260px;">
-      <input type="text" readonly aria-label="Listener link"
+      <input type="text" readonly aria-label="Listener link" id="listener-link"
              value="/listener/{{ event.slug }}?code={{ event.listener_join_code }}" onclick="this.select()" />
+      <button type="button" class="btn btn-sm btn-copy" data-copy-target="listener-link">Copy</button>
       <a href="/listener/{{ event.slug }}?code={{ event.listener_join_code }}" target="_blank" class="btn btn-sm">Open ↗</a>
     </div>
   </div>

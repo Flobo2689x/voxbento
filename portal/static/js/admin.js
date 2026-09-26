@@ -5,25 +5,24 @@
 
 import { initLocalModelDownloader } from './download-model.js';
 
-function copyToClipboard(targetId) {
+function copyToClipboard(targetId, btn) {
   const el = document.getElementById(targetId);
   if (!el) return;
-  const text = el.textContent.trim();
+  const text = (el instanceof HTMLInputElement ? el.value : el.textContent).trim();
   const fullUrl = text.startsWith('/') ? window.location.origin + text : text;
   navigator.clipboard.writeText(fullUrl).then(() => {
-    const btn = el.nextElementSibling;
-    if (btn) {
-      const orig = btn.textContent;
-      btn.textContent = 'Copied!';
-      setTimeout(() => { btn.textContent = orig; }, 1500);
-    }
+    const orig = btn.textContent;
+    btn.textContent = 'Copied!';
+    setTimeout(() => { btn.textContent = orig; }, 1500);
+  }).catch((error) => {
+    console.error(`Failed to copy #${targetId} to the clipboard`, error);
   });
 }
 
 document.addEventListener('DOMContentLoaded', () => {
   document.querySelectorAll('.btn-copy[data-copy-target]').forEach((btn) => {
     btn.addEventListener('click', () => {
-      copyToClipboard(btn.dataset.copyTarget);
+      copyToClipboard(btn.dataset.copyTarget, btn);
     });
   });
   initCustomModal();
