@@ -56,9 +56,21 @@ async function copyText(text) {
   }
 }
 
+// Per-button original label and pending reset timer, so repeated clicks on the
+// same Copy button restore the true original label instead of whatever
+// transient text ("Copied!") happened to be showing at the time of the click.
+const copyOriginalLabels = new WeakMap();
+const copyResetTimers = new WeakMap();
+
 async function copyToClipboard(targetId, btn) {
   const el = document.getElementById(targetId);
   if (!el) return;
+  if (!copyOriginalLabels.has(btn)) {
+    copyOriginalLabels.set(btn, btn.textContent);
+  }
+  const orig = copyOriginalLabels.get(btn);
+  clearTimeout(copyResetTimers.get(btn));
+
   const text = (el instanceof HTMLInputElement ? el.value : el.textContent).trim();
   const fullUrl = text.startsWith('/') ? window.location.origin + text : text;
   try {
@@ -72,9 +84,8 @@ async function copyToClipboard(targetId, btn) {
     showToast('Could not copy the link. Select the text and copy it manually.', 'error');
     return;
   }
-  const orig = btn.textContent;
   btn.textContent = 'Copied!';
-  setTimeout(() => { btn.textContent = orig; }, 1500);
+  copyResetTimers.set(btn, setTimeout(() => { btn.textContent = orig; }, 1500));
   showToast('Link copied to clipboard.', 'success');
 }
 
