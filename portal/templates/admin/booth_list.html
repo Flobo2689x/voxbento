@@ -70,7 +70,8 @@
         <form method="post" action="/admin/events/{{ event.id }}/rooms/{{ room.id }}/booths/{{ bs.db.id }}/delete"
               class="inline-delete"
               data-confirm="Delete {{ bs.db.language_name }} booth?">
-          <button type="submit" class="btn btn-sm btn-danger" title="Delete this booth">Delete</button>
+          <button type="submit" class="btn btn-sm btn-danger" title="Delete this booth"
+                  aria-label="Delete this booth">Delete</button>
         </form>
       </td>
     </tr>
