@@ -5,21 +5,71 @@
 
 import { initLocalModelDownloader } from './download-model.js';
 
+/**
+ * Shows a short-lived toast and announces it via the aria-live region in
+ * admin/base.html, so both sighted and assistive-tech users get the same
+ * feedback.
+ */
+function showToast(message, kind) {
+  const container = document.getElementById('toast-container');
+  if (!container) return;
+  const toast = document.createElement('div');
+  toast.className = `toast toast--${kind}`;
+  toast.textContent = message;
+  container.appendChild(toast);
+  setTimeout(() => { toast.remove(); }, 3000);
+}
+
+/**
+ * Copies text via navigator.clipboard where available (secure contexts only),
+ * falling back to a hidden textarea + execCommand('copy') otherwise.
+ * @throws {Error} when neither copy method is available or succeeds.
+ */
+async function copyText(text) {
+  if (navigator.clipboard) {
+    await navigator.clipboard.writeText(text);
+    return;
+  }
+  // navigator.clipboard is undefined outside secure contexts (plain http on a LAN host).
+  // execCommand is deprecated but still the only synchronous fallback for that case.
+  const textarea = document.createElement('textarea');
+  textarea.value = text;
+  textarea.style.position = 'fixed';
+  textarea.style.opacity = '0';
+  document.body.appendChild(textarea);
+  textarea.focus();
+  textarea.select();
+  let copied = false;
+  try {
+    copied = document.execCommand('copy');
+  } finally {
+    textarea.remove();
+  }
+  if (!copied) {
+    throw new Error('execCommand("copy") did not succeed');
+  }
+}
+
 async function copyToClipboard(targetId, btn) {
   const el = document.getElementById(targetId);
   if (!el) return;
   const text = (el instanceof HTMLInputElement ? el.value : el.textContent).trim();
   const fullUrl = text.startsWith('/') ? window.location.origin + text : text;
   try {
-    // navigator.clipboard is undefined outside secure contexts (plain http on a LAN host).
-    await navigator.clipboard.writeText(fullUrl);
+    await copyText(fullUrl);
   } catch (error) {
     console.error(`Failed to copy #${targetId} to the clipboard`, error);
+    // Select the source field so the admin can copy manually as a last resort.
+    if (el instanceof HTMLInputElement) {
+      el.select();
+    }
+    showToast('Could not copy the link. Select the text and copy it manually.', 'error');
     return;
   }
   const orig = btn.textContent;
   btn.textContent = 'Copied!';
   setTimeout(() => { btn.textContent = orig; }, 1500);
+  showToast('Link copied to clipboard.', 'success');
 }
 
 document.addEventListener('DOMContentLoaded', () => {
