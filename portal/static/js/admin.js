@@ -27,8 +27,14 @@ function showToast(message, kind) {
  */
 async function copyText(text) {
   if (navigator.clipboard) {
-    await navigator.clipboard.writeText(text);
-    return;
+    try {
+      await navigator.clipboard.writeText(text);
+      return;
+    } catch (error) {
+      // navigator.clipboard can exist but still reject (e.g. a permissions-policy
+      // block), so fall through to the execCommand path below instead of giving up.
+      console.error('navigator.clipboard.writeText rejected, trying execCommand fallback', error);
+    }
   }
   // navigator.clipboard is undefined outside secure contexts (plain http on a LAN host).
   // execCommand is deprecated but still the only synchronous fallback for that case.
