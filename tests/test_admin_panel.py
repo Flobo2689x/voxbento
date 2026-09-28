@@ -1092,3 +1092,41 @@ async def test_event_detail_listener_link_has_copy_button(admin_cookie, seed_eve
     assert resp.status_code == 200
     assert 'id="listener-link"' in resp.text
     assert 'data-copy-target="listener-link"' in resp.text
+
+
+@pytest.mark.anyio
+@pytest.mark.parametrize(
+    "path",
+    [
+        "/admin/events/{event}/",
+        "/admin/events/{event}/members/",
+        "/admin/events/{event}/rooms/{room}/booths/{booth}/",
+        "/admin/users/{user}/",
+    ],
+)
+async def test_admin_detail_pages_have_no_inline_styles(path, admin_cookie, seed_event):
+    import re
+
+    from portal.auth import hash_password
+    from portal.database import create_user, get_session
+
+    event, room, booth = seed_event
+    async with get_session() as s:
+        user = await create_user(
+            s,
+            email="detail@test.com",
+            display_name="Detail User",
+            password_hash=hash_password("securepass123"),
+            email_verified=True,
+        )
+
+    async with _client() as c:
+        resp = await c.get(
+            path.format(event=event.id, room=room.id, booth=booth.id, user=user.id),
+            cookies=admin_cookie,
+        )
+
+    assert resp.status_code == 200
+    # The API key modals keep style="display: none", which admin.js toggles.
+    body = resp.content.replace(b'style="display: none;"', b"")
+    assert not re.search(rb"\sstyle\s*=", body, re.IGNORECASE)
