@@ -44,10 +44,13 @@ shareEventBtn.addEventListener("click", async function () {
     try {
       await navigator.share({ title: document.title, url: url });
       // The share sheet itself confirms success to the user; nothing more to announce.
+      // Still restore the label in case a previous click left "Copied!"/"Copy failed" showing.
+      shareEventBtn.textContent = "Share Event";
       return;
     } catch (error) {
       if (error && error.name === "AbortError") {
         // User dismissed the share sheet; do not fall back to clipboard.
+        shareEventBtn.textContent = "Share Event";
         return;
       }
       console.error("Web Share failed, falling back to clipboard", error);
