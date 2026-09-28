@@ -1141,19 +1141,22 @@ async def test_user_list_row_actions_snapshot(admin_cookie):
     row = row_match.group(0)
 
     # New users are active by default (portal.models.User.is_active), so the
-    # toggle button reads "Deactivate" here.
+    # toggle button reads "Deactivate" here. The label includes the user's
+    # email so repeated "Deactivate"/"Delete" buttons across rows have distinct
+    # accessible names.
     deactivate_toggle = re.search(
         r'<button type="submit" class="btn btn-sm btn-warning"\s+'
-        r'title="Deactivate this user account"\s+'
-        r'aria-label="Deactivate this user account">'
+        r'title="Deactivate the account for snapshot@example\.com"\s+'
+        r'aria-label="Deactivate the account for snapshot@example\.com">'
         r"\s*Deactivate\s*</button>",
         row,
     )
     assert deactivate_toggle, row
 
     delete_button = re.search(
-        r'<button type="submit" class="btn btn-sm btn-danger" title="Permanently delete this user"\s+'
-        r'aria-label="Permanently delete this user">'
+        r'<button type="submit" class="btn btn-sm btn-danger"'
+        r' title="Permanently delete the account for snapshot@example\.com"\s+'
+        r'aria-label="Permanently delete the account for snapshot@example\.com">'
         r"Delete</button>",
         row,
     )
