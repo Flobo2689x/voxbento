@@ -1103,10 +1103,14 @@ async def test_admin_list_action_buttons_have_tooltips(path, admin_cookie, seed_
     buttons = re.findall(r'<button type="submit" class="btn btn-sm[^>]*>', resp.text)
     assert buttons, "expected row action buttons on the page"
     for button in buttons:
-        # Consistent title/aria-label: every row action carries both, so the
-        # accessible name is the same whether or not the browser exposes `title`.
-        assert 'title="' in button, button
-        assert 'aria-label="' in button, button
+        # Consistent title/aria-label: every row action carries both, non-empty and
+        # matching, so the accessible name is the same whether or not the browser
+        # exposes `title`.
+        title_match = re.search(r'title="([^"]*)"', button)
+        aria_label_match = re.search(r'aria-label="([^"]*)"', button)
+        assert title_match and title_match.group(1), button
+        assert aria_label_match and aria_label_match.group(1), button
+        assert title_match.group(1) == aria_label_match.group(1), button
 
 
 @pytest.mark.anyio
