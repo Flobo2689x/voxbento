@@ -1115,6 +1115,8 @@ async def test_admin_pages_have_a_toast_live_region(admin_cookie, seed_event):
         "/admin/events/{event}/",
         "/admin/events/{event}/members/",
         "/admin/events/{event}/rooms/{room}/booths/{booth}/",
+        "/admin/events/{event}/rooms/{room}/",
+        "/admin/events/{event}/rooms/{room}/transcripts/",
         "/admin/users/{user}/",
     ],
 )
